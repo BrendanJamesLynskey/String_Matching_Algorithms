@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>String Matching Algorithms</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+  :root {
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
+    --border: #2a2a3a;
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
+  }
+
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
+
+  /* ── slide chrome ── */
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
+  }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
+
+  /* ── two-column ── */
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
+
+  /* ── cards ── */
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
+  }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
+
+  /* ── table ── */
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+
+  /* ── accent spans ── */
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ── SVG graph diagrams ── */
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+
+  /* ── pill badges ── */
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
+  }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
+
+  /* ── footer — hidden ── */
+  .reveal .slide-footer { display: none; }
+  /* title slide special */
+  .title-slide h1 { font-size: 1.8em; }
+  .title-slide .subtitle {
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
+  }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  /* ── super-step animator ── */
+  .ss-row {
+    display: flex; gap: .25em; align-items: center;
+    margin: .1em 0; font-size: .55em; font-family: 'JetBrains Mono', monospace;
+  }
+  .ss-node {
+    padding: .2em .55em; border-radius: 5px; font-size: .9em;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  }
+  .ss-node.active { background: #1a2a1a; border-color: var(--green); color: var(--green); }
+  .ss-node.done   { background: #1a1a2a; border-color: var(--purple); color: var(--purple); }
+  .ss-arrow { color: var(--amber); }
+  .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
+
+  /* reduce default margins */
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+.reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 01 — Title
+══════════════════════════════════════════════════════════════════ -->
+<section class="title-slide" data-background-color="#0a0a0f">
+  <div style="font-family:'JetBrains Mono',monospace; font-size:.5em; color:var(--muted); margin-bottom:.4em; letter-spacing:.1em;">COMPUTER SCIENCE FUNDAMENTALS SERIES</div>
+  <h1>String Matching<br>Algorithms</h1>
+  <div class="subtitle">
+    KMP &middot; Rabin-Karp &middot; Boyer-Moore &middot; Suffix arrays &middot;<br>
+    Aho-Corasick &middot; Pattern matching
+  </div>
+  <div style="width:60px; height:3px; background:var(--amber); margin-bottom:1.4em;"></div>
+  <div class="meta">
+    Mid-level software engineer track &nbsp;&middot;&nbsp; 20 slides
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 02 — The String Matching Problem
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">02</span>
+    <h2>The String Matching Problem</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Definition</h3>
+      <p>Given a text <code>T</code> of length <code>n</code> and a pattern <code>P</code> of length <code>m</code>, find all occurrences of <code>P</code> in <code>T</code>.</p>
+      <ul>
+        <li><strong>Input:</strong> text <code>T[0..n-1]</code>, pattern <code>P[0..m-1]</code></li>
+        <li><strong>Output:</strong> all positions <code>i</code> where <code>T[i..i+m-1] == P</code></li>
+      </ul>
+      <h3 style="margin-top:.4em">Why it matters</h3>
+      <p>Every time you press Ctrl+F, run <code>grep</code>, query a database with <code>LIKE</code>, or align a DNA sequence, a string matching algorithm is at work.</p>
+    </div>
+    <div>
+      <h3>Terminology</h3>
+      <table>
+        <tr><th>Term</th><th>Meaning</th></tr>
+        <tr><td><span class="a">Text</span></td><td>The string being searched (haystack)</td></tr>
+        <tr><td><span class="a">Pattern</span></td><td>The string being searched for (needle)</td></tr>
+        <tr><td><span class="a">Alphabet</span></td><td>The set of valid characters, size <code>|&Sigma;|</code></td></tr>
+        <tr><td><span class="a">Shift</span></td><td>An alignment position of pattern against text</td></tr>
+        <tr><td><span class="a">Valid shift</span></td><td>A shift where every character matches</td></tr>
+      </table>
+      <p style="margin-top:.4em; color:var(--muted); font-size:.48em">The naive approach checks every shift. Efficient algorithms skip provably invalid shifts.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 03 — Naive String Matching
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">03</span>
+    <h2>Naive String Matching</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <h3>The brute-force approach</h3>
+      <p>For each position <code>i</code> in the text, compare <code>P[0..m-1]</code> against <code>T[i..i+m-1]</code> character by character.</p>
+      <pre><code>NAIVE-STRING-MATCH(T, P):
+  n = len(T), m = len(P)
+  for i = 0 to n - m:
+    if T[i..i+m-1] == P[0..m-1]:
+      report match at i</code></pre>
+      <h3 style="margin-top:.3em">When it is good enough</h3>
+      <ul>
+        <li>Short patterns (<code>m &lt; 10</code>) on moderate text</li>
+        <li>Large alphabets (English text) where mismatches occur early</li>
+        <li>One-off searches where preprocessing overhead is not justified</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Complexity</h3>
+      <div class="card amber" style="margin-bottom:.3em">
+        <h3>Worst case</h3>
+        <p><code>O(n &middot; m)</code> &mdash; e.g. <code>T = "aaaaaa"</code>, <code>P = "aaab"</code></p>
+      </div>
+      <div class="card green" style="margin-bottom:.3em">
+        <h3>Best case</h3>
+        <p><code>O(n)</code> &mdash; first character of pattern rarely matches</p>
+      </div>
+      <div class="card purple" style="margin-bottom:.3em">
+        <h3>Average case</h3>
+        <p><code>O(n)</code> &mdash; for random text over a large alphabet</p>
+      </div>
+      <div class="card blue">
+        <h3>Space</h3>
+        <p><code>O(1)</code> &mdash; no preprocessing required</p>
+      </div>
+      <p style="margin-top:.4em; color:var(--muted); font-size:.48em">The naive algorithm discards all information from a partial match. Every advanced algorithm exploits that wasted knowledge.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 04 — KMP: Intuition & Failure Function
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">04</span>
+    <h2>KMP &mdash; Intuition &amp; Failure Function</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Core insight</h3>
+      <p>When a mismatch occurs at <code>P[j]</code> after matching <code>P[0..j-1]</code>, the naive algorithm restarts from scratch. KMP asks: what is the longest proper prefix of <code>P[0..j-1]</code> that is also a suffix? Resume matching from there.</p>
+      <h3 style="margin-top:.3em">The failure function (prefix table)</h3>
+      <p><code>&pi;[j]</code> = length of the longest proper prefix of <code>P[0..j]</code> that is also a suffix.</p>
+      <pre><code>Pattern: A B A B A C
+Index:   0 1 2 3 4 5
+&pi;:       0 0 1 2 3 0</code></pre>
+    </div>
+    <div>
+      <h3>Building the prefix table &mdash; O(m)</h3>
+      <pre><code>COMPUTE-PREFIX(P):
+  m = len(P)
+  &pi;[0] = 0
+  k = 0
+  for q = 1 to m - 1:
+    while k &gt; 0 and P[k] != P[q]:
+      k = &pi;[k - 1]
+    if P[k] == P[q]:
+      k = k + 1
+    &pi;[q] = k
+  return &pi;</code></pre>
+      <p style="margin-top:.4em; color:var(--muted); font-size:.48em">The prefix table encodes the internal structure of the pattern so that no text character is ever re-examined.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 05 — KMP: Algorithm Walkthrough
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">05</span>
+    <h2>KMP &mdash; Algorithm Walkthrough</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <h3>The algorithm</h3>
+      <pre><code>KMP-SEARCH(T, P):
+  n = len(T), m = len(P)
+  &pi; = COMPUTE-PREFIX(P)
+  q = 0
+  for i = 0 to n - 1:
+    while q &gt; 0 and P[q] != T[i]:
+      q = &pi;[q - 1]       // fall back
+    if P[q] == T[i]:
+      q = q + 1
+    if q == m:
+      report match at i - m + 1
+      q = &pi;[q - 1]       // next match</code></pre>
+      <h3 style="margin-top:.3em">Trace example</h3>
+      <pre><code>Text:    A B A B A B A C A B
+Pattern: A B A B A C
+&pi;:       0 0 1 2 3 0
+
+i=4: matched ABABA, mismatch P[5]='C' vs T[5]='B'
+     q = &pi;[4] = 3, resume P[3] with T[5]
+     &rarr; skipped re-examining T[0..2]</code></pre>
+    </div>
+    <div>
+      <h3>Complexity</h3>
+      <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td><span class="a">Preprocessing</span></td><td><code>O(m)</code> &mdash; build prefix table</td></tr>
+        <tr><td><span class="a">Matching</span></td><td><code>O(n)</code> &mdash; each character examined at most twice</td></tr>
+        <tr><td><span class="a">Total</span></td><td><code>O(n + m)</code></td></tr>
+        <tr><td><span class="a">Space</span></td><td><code>O(m)</code> &mdash; prefix table</td></tr>
+      </table>
+      <p style="margin-top:.5em; color:var(--muted); font-size:.48em">KMP guarantees exactly <code>O(n)</code> comparisons in the worst case &mdash; no algorithm can do fewer for single-pattern exact matching.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 06 — Rabin-Karp: Rolling Hash
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">06</span>
+    <h2>Rabin-Karp &mdash; Rolling Hash</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Idea</h3>
+      <p>Instead of comparing characters, compute a hash of each <code>m</code>-length window and compare it to the hash of the pattern. A <em>rolling hash</em> updates in <code>O(1)</code> per shift.</p>
+      <h3 style="margin-top:.3em">Rolling hash (polynomial)</h3>
+      <pre><code>hash(S[i..i+m-1]) =
+  &Sigma; S[i+j] &middot; d^(m-1-j) mod q
+
+d = |&Sigma;| (alphabet size)
+q = large prime</code></pre>
+      <h3 style="margin-top:.3em">Sliding the window</h3>
+      <pre><code>hash(S[i+1..i+m]) =
+  (hash(S[i..i+m-1])
+   - S[i] &middot; d^(m-1)) &middot; d
+   + S[i+m]  mod q</code></pre>
+    </div>
+    <div>
+      <h3>Algorithm sketch</h3>
+      <pre><code>RABIN-KARP(T, P):
+  hp = hash(P[0..m-1])
+  ht = hash(T[0..m-1])
+  for i = 0 to n - m:
+    if ht == hp:
+      if T[i..i+m-1] == P:  // verify
+        report match at i
+    ht = roll(ht, T[i], T[i+m])</code></pre>
+      <div class="card green" style="margin-top:.4em">
+        <h3>Key strength</h3>
+        <p>Natural extension to multi-pattern search &mdash; hash each pattern, store in a set, check every window against the set.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 07 — Rabin-Karp: Spurious Hits & Multi-Pattern
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">07</span>
+    <h2>Rabin-Karp &mdash; Spurious Hits &amp; Multi-Pattern</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Spurious hits</h3>
+      <p>Two different strings can have the same hash (collision). Each collision triggers a full <code>O(m)</code> character comparison. With a good prime <code>q</code>, the expected number of spurious hits is <code>O(n/q)</code>.</p>
+      <h3 style="margin-top:.3em">Complexity</h3>
+      <table>
+        <tr><th>Case</th><th>Time</th></tr>
+        <tr><td><span class="g">Best / average</span></td><td><code>O(n + m)</code></td></tr>
+        <tr><td><span class="r">Worst case</span></td><td><code>O(n &middot; m)</code> &mdash; many collisions</td></tr>
+        <tr><td><span class="b">Space</span></td><td><code>O(1)</code> beyond input</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Multi-pattern variant</h3>
+      <p>To search for <code>k</code> patterns simultaneously:</p>
+      <ol>
+        <li>Hash all <code>k</code> patterns and store in a hash set</li>
+        <li>Slide window over text; check each window hash against the set</li>
+        <li>Expected time: <code>O(n + km)</code></li>
+      </ol>
+      <h3 style="margin-top:.3em">Practical tips</h3>
+      <ul>
+        <li>Use double hashing (two independent hash functions) to reduce false positives to near zero</li>
+        <li>Rabin-Karp is the basis of many plagiarism detectors (compare document fingerprints)</li>
+        <li>Works well when pattern length is fixed and known</li>
+      </ul>
+      <p style="margin-top:.4em; color:var(--muted); font-size:.48em">Rabin-Karp trades deterministic guarantees for practical speed and multi-pattern flexibility.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 08 — Boyer-Moore: Bad Character Rule
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">08</span>
+    <h2>Boyer-Moore &mdash; Bad Character Rule</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Why Boyer-Moore?</h3>
+      <p>Often the fastest single-pattern algorithm in practice. Scans the pattern <em>right to left</em> and uses two heuristics to skip large portions of text.</p>
+      <h3 style="margin-top:.3em">Bad character rule</h3>
+      <p>When a mismatch occurs at text character <code>c</code> and pattern position <code>j</code>:</p>
+      <ul>
+        <li>If <code>c</code> does not appear in the pattern &rarr; shift pattern past the mismatch entirely</li>
+        <li>If <code>c</code> appears at position <code>k &lt; j</code> &rarr; align that occurrence with the text</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Example</h3>
+      <pre><code>Text:    ...X E R C I S E...
+Pattern:    E X A M P L E
+            &larr;───── comparing right to left
+Mismatch: T[3]='R' vs P[3]='M'
+'R' not in pattern
+  &rarr; shift pattern 4 positions right</code></pre>
+      <h3 style="margin-top:.3em">Bad character table</h3>
+      <pre><code>BUILD-BAD-CHAR(P):
+  for each c in &Sigma;: bc[c] = -1
+  for j = 0 to m - 1:
+    bc[P[j]] = j
+  return bc</code></pre>
+      <p style="margin-top:.3em; color:var(--muted); font-size:.48em">The bad character rule alone gives sub-linear average performance on large alphabets.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 09 — Boyer-Moore: Good Suffix Rule
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">09</span>
+    <h2>Boyer-Moore &mdash; Good Suffix Rule</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <h3>Good suffix rule</h3>
+      <p>When characters <code>P[j+1..m-1]</code> have matched but <code>P[j]</code> mismatches:</p>
+      <ul>
+        <li>Find the rightmost occurrence of the matched suffix elsewhere in the pattern</li>
+        <li>If no full occurrence exists, find the longest prefix of the pattern that matches a suffix of the matched portion</li>
+        <li>Shift accordingly</li>
+      </ul>
+      <h3 style="margin-top:.3em">Combined shift</h3>
+      <pre><code>shift = max(bad_char_shift,
+            good_suffix_shift)</code></pre>
+      <p style="margin-top:.3em">Boyer-Moore always takes the <em>maximum</em> of both heuristics &mdash; the larger the skip, the better.</p>
+    </div>
+    <div>
+      <h3>Complexity</h3>
+      <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td><span class="a">Preprocessing</span></td><td><code>O(m + |&Sigma;|)</code></td></tr>
+        <tr><td><span class="g">Best case</span></td><td><code>O(n/m)</code> &mdash; sub-linear!</td></tr>
+        <tr><td><span class="r">Worst case</span></td><td><code>O(n &middot; m)</code> &mdash; <code>O(n)</code> with Galil</td></tr>
+        <tr><td><span class="b">Average</span></td><td><code>O(n/m)</code> for large alphabets</td></tr>
+      </table>
+      <h3 style="margin-top:.4em">In practice</h3>
+      <ul>
+        <li>Default algorithm in GNU <code>grep</code></li>
+        <li>Faster than KMP for long patterns on natural-language text</li>
+        <li>The <code>O(n/m)</code> best case means longer patterns can actually be <em>faster</em> to find</li>
+      </ul>
+      <p style="margin-top:.4em; color:var(--muted); font-size:.48em">Boyer-Moore is the rare algorithm where increasing the pattern length improves performance.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 10 — Z-Algorithm
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">10</span>
+    <h2>Z-Algorithm</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Z-array definition</h3>
+      <p>For a string <code>S</code>, <code>Z[i]</code> = length of the longest substring starting at <code>S[i]</code> that matches a prefix of <code>S</code>.</p>
+      <pre><code>S:  a a b x a a b
+Z:  - 1 0 0 3 1 0</code></pre>
+      <h3 style="margin-top:.3em">Algorithm &mdash; O(n)</h3>
+      <p>Maintain a Z-box <code>[l, r]</code> representing the rightmost interval matching a prefix. For each position <code>i</code>:</p>
+      <ul>
+        <li>If <code>i &gt; r</code>, compute <code>Z[i]</code> naively and update <code>[l, r]</code></li>
+        <li>If <code>i &le; r</code>, use previously computed values to initialise <code>Z[i]</code>, then extend if needed</li>
+      </ul>
+    </div>
+    <div>
+      <h3>String matching with Z-algorithm</h3>
+      <p>Concatenate <code>P$T</code> (where <code>$</code> is not in the alphabet) and compute the Z-array. Any position <code>i</code> where <code>Z[i] == m</code> is a match.</p>
+      <pre><code>P = "aab", T = "aabxaab"
+S = "aab$aabxaab"
+Z = [- 1 0 0 3 1 0 0 3 1 0]
+  matches at i=4 and i=8
+  &rarr; text positions 0 and 4</code></pre>
+      <h3 style="margin-top:.3em">Complexity</h3>
+      <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td><span class="a">Time</span></td><td><code>O(n + m)</code></td></tr>
+        <tr><td><span class="b">Space</span></td><td><code>O(n + m)</code></td></tr>
+      </table>
+      <p style="margin-top:.4em; color:var(--muted); font-size:.48em">The Z-algorithm is conceptually simpler than KMP and equally powerful. It is also the foundation for many suffix-based constructions.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 11 — Aho-Corasick
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">11</span>
+    <h2>Aho-Corasick &mdash; Multi-Pattern Matching</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Problem</h3>
+      <p>Given <code>k</code> patterns and text of length <code>n</code>, find all occurrences of all patterns in one pass.</p>
+      <h3 style="margin-top:.3em">Construction</h3>
+      <ol>
+        <li><span class="a">Build a trie</span> from all <code>k</code> patterns</li>
+        <li><span class="g">Add failure links</span> &mdash; analogous to KMP's failure function; on mismatch, follow the failure link to the longest proper suffix that is also a prefix of some pattern</li>
+        <li><span class="p">Add output links</span> &mdash; chain patterns that end at the same trie node via suffixes</li>
+      </ol>
+      <h3 style="margin-top:.3em">Example</h3>
+      <pre><code>Patterns: {he, she, his, hers}
+Text:     "ushers"
+
+Matches: she (at 1), he (at 2),
+         hers (at 2)</code></pre>
+    </div>
+    <div>
+      <h3>Search &mdash; O(n + z)</h3>
+      <p>Feed the text through the automaton character by character. At each state, follow output links to report all matching patterns. <code>z</code> = total matches reported.</p>
+      <h3 style="margin-top:.3em">Complexity</h3>
+      <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td><span class="a">Build</span></td><td><code>O(m &middot; |&Sigma;|)</code> where <code>m</code> = total pattern length</td></tr>
+        <tr><td><span class="g">Search</span></td><td><code>O(n + z)</code> &mdash; linear in text + output</td></tr>
+        <tr><td><span class="b">Space</span></td><td><code>O(m &middot; |&Sigma;|)</code> for the automaton</td></tr>
+      </table>
+      <h3 style="margin-top:.4em">Used in</h3>
+      <div style="margin-top:.2em">
+        <span class="pill amber">Snort IDS</span>
+        <span class="pill green">fgrep</span>
+        <span class="pill purple">virus scanners</span>
+        <span class="pill blue">ripgrep</span>
+      </div>
+      <p style="margin-top:.4em; color:var(--muted); font-size:.48em">Aho-Corasick is the multi-pattern generalisation of KMP.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 12 — Suffix Arrays
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">12</span>
+    <h2>Suffix Arrays</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Definition</h3>
+      <p>A suffix array <code>SA</code> for string <code>S</code> of length <code>n</code> is a sorted array of all suffix indices ordered by the lexicographic order of the suffixes they represent.</p>
+      <pre><code>S = "banana$"
+Suffixes sorted:     SA:
+$                    6
+a$                   5
+ana$                 3
+anana$               1
+banana$              0
+na$                  4
+nana$                2</code></pre>
+      <h3 style="margin-top:.3em">Pattern search</h3>
+      <p>Binary search the suffix array. Each comparison is <code>O(m)</code>, so search is <code>O(m log n)</code>. With an <span class="g">LCP array</span>, this improves to <code>O(m + log n)</code>.</p>
+    </div>
+    <div>
+      <h3>Construction algorithms</h3>
+      <table>
+        <tr><th>Algorithm</th><th>Time</th><th>Space</th></tr>
+        <tr><td>Naive sort</td><td><code>O(n&sup2; log n)</code></td><td><code>O(n)</code></td></tr>
+        <tr><td>Prefix doubling</td><td><code>O(n log n)</code></td><td><code>O(n)</code></td></tr>
+        <tr><td>SA-IS / DC3</td><td><code>O(n)</code></td><td><code>O(n)</code></td></tr>
+      </table>
+      <h3 style="margin-top:.4em">LCP array</h3>
+      <p>Stores the length of the longest common prefix between consecutive suffixes in sorted order. Enables:</p>
+      <ul>
+        <li>Longest repeated substring &mdash; <code>max(LCP)</code></li>
+        <li>Number of distinct substrings &mdash; <code>n(n+1)/2 - &Sigma;LCP</code></li>
+        <li>Faster pattern search &mdash; <code>O(m + log n)</code></li>
+      </ul>
+      <p style="margin-top:.4em; color:var(--muted); font-size:.48em">Suffix arrays use 4-8x less memory than suffix trees while supporting most of the same queries. Preferred in modern bioinformatics.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 13 — Suffix Trees
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">13</span>
+    <h2>Suffix Trees</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Definition</h3>
+      <p>A suffix tree for string <code>S</code> is a compressed trie of all suffixes of <code>S$</code>. Every internal node (except root) has at least two children. Edge labels are substrings of <code>S</code>.</p>
+      <h3 style="margin-top:.3em">Key properties</h3>
+      <ul>
+        <li>Contains <code>n</code> leaves (one per suffix)</li>
+        <li>At most <code>n - 1</code> internal nodes</li>
+        <li>Built in <code>O(n)</code> time (Ukkonen's algorithm)</li>
+        <li>Every substring of <code>S</code> corresponds to a path from the root</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Operations</h3>
+      <table>
+        <tr><th>Operation</th><th>Time</th></tr>
+        <tr><td>Pattern search</td><td><code>O(m)</code></td></tr>
+        <tr><td>Longest repeated substring</td><td><code>O(n)</code></td></tr>
+        <tr><td>Longest common substring</td><td><code>O(n + m)</code></td></tr>
+        <tr><td>Distinct substrings</td><td><code>O(n)</code></td></tr>
+        <tr><td>Shortest unique substring</td><td><code>O(n)</code></td></tr>
+      </table>
+      <h3 style="margin-top:.4em">Trade-offs</h3>
+      <div class="card green" style="margin-bottom:.2em">
+        <h3>Advantage</h3>
+        <p><code>O(m)</code> pattern matching (no log factor), rich query support</p>
+      </div>
+      <div class="card red">
+        <h3>Disadvantage</h3>
+        <p>10-20x memory overhead per character; complex to implement. Suffix arrays + LCP have largely replaced suffix trees in practice.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 14 — Regular Expression Matching
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">14</span>
+    <h2>Regular Expression Matching</h2>
+  </div>
+  <div class="cols cols-3" style="margin-top:.3em">
+    <div class="card amber">
+      <h3>NFA simulation (Thompson)</h3>
+      <ul>
+        <li>Parse regex into NFA &mdash; <code>O(m)</code> states</li>
+        <li>Maintain set of active states</li>
+        <li>For each input character, compute next state set</li>
+        <li><span class="a">Time:</span> <code>O(n &middot; m)</code></li>
+        <li><span class="a">Space:</span> <code>O(m)</code></li>
+        <li>No pathological backtracking &mdash; always linear in <code>n &middot; m</code></li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>DFA approach</h3>
+      <ul>
+        <li>Convert NFA to DFA (subset construction)</li>
+        <li>Each character requires exactly one state transition</li>
+        <li><span class="g">Matching:</span> <code>O(n)</code> &mdash; one transition per character</li>
+        <li><span class="r">Construction:</span> up to <code>O(2^m)</code> states (exponential blowup)</li>
+        <li>Lazy DFA builds states on demand, caching frequent ones</li>
+      </ul>
+    </div>
+    <div class="card red">
+      <h3>Backtracking engines</h3>
+      <ul>
+        <li>PCRE, Python <code>re</code>, Java <code>regex</code></li>
+        <li><code>O(2^n)</code> worst case</li>
+        <li>Patterns like <code>(a+)+b</code> cause catastrophic backtracking</li>
+        <li>Support backreferences (not regular)</li>
+        <li><span class="g">Safe alternatives:</span> RE2, Rust <code>regex</code>, Go <code>regexp</code></li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:.4em; color:var(--muted); font-size:.48em">Use Thompson NFA or lazy DFA engines for guaranteed linear-time matching. Avoid backtracking engines on untrusted input.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 15 — Approximate String Matching
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">15</span>
+    <h2>Approximate String Matching &mdash; Edit Distance</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Edit distance (Levenshtein)</h3>
+      <p>Minimum number of single-character operations (insert, delete, substitute) to transform string <code>A</code> into <code>B</code>.</p>
+      <pre><code>edit_distance("kitten", "sitting") = 3
+  kitten &rarr; sitten  (sub k&rarr;s)
+  sitten &rarr; sittin  (sub e&rarr;i)
+  sittin &rarr; sitting (insert g)</code></pre>
+      <h3 style="margin-top:.3em">DP recurrence &mdash; O(nm)</h3>
+      <pre><code>DP[i][j] = min(
+  DP[i-1][j] + 1,      // delete
+  DP[i][j-1] + 1,      // insert
+  DP[i-1][j-1] + cost  // substitute
+)
+// cost = 0 if A[i] == B[j]</code></pre>
+    </div>
+    <div>
+      <h3>Variants</h3>
+      <table>
+        <tr><th>Variant</th><th>Operations</th></tr>
+        <tr><td><span class="a">Levenshtein</span></td><td>Insert, delete, substitute</td></tr>
+        <tr><td><span class="g">Damerau-Levenshtein</span></td><td>+ transposition of adjacent chars</td></tr>
+        <tr><td><span class="p">Hamming</span></td><td>Substitution only (equal-length)</td></tr>
+        <tr><td><span class="b">LCS distance</span></td><td>Insert and delete only</td></tr>
+      </table>
+      <h3 style="margin-top:.4em">Applications</h3>
+      <ul>
+        <li>Spell checkers and autocorrect</li>
+        <li>Fuzzy search (find strings within edit distance <code>k</code>)</li>
+        <li>DNA/protein sequence alignment</li>
+        <li>OCR post-correction</li>
+      </ul>
+      <p style="margin-top:.4em; color:var(--muted); font-size:.48em">Edit distance DP is the foundation of bioinformatics alignment algorithms like Smith-Waterman and Needleman-Wunsch.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 16 — Longest Common Substring
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">16</span>
+    <h2>Longest Common Substring</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Problem</h3>
+      <p>Given two strings <code>A</code> (length <code>n</code>) and <code>B</code> (length <code>m</code>), find the longest string that is a contiguous substring of both.</p>
+      <h3 style="margin-top:.3em">DP approach &mdash; O(nm)</h3>
+      <pre><code>DP[i][j] = DP[i-1][j-1] + 1  if A[i]==B[j]
+         = 0                   otherwise
+
+Answer = max(DP[i][j]) for all i, j</code></pre>
+      <h3 style="margin-top:.3em">Suffix array approach</h3>
+      <ol>
+        <li>Concatenate <code>A$B#</code> (unique separators)</li>
+        <li>Build suffix array and LCP array</li>
+        <li>Answer = maximum LCP between adjacent suffixes from different strings</li>
+      </ol>
+    </div>
+    <div>
+      <h3>Comparison of methods</h3>
+      <table>
+        <tr><th>Method</th><th>Time</th><th>Space</th></tr>
+        <tr><td>DP</td><td><code>O(nm)</code></td><td><code>O(nm)</code> or <code>O(m)</code></td></tr>
+        <tr><td>Suffix array</td><td><code>O((n+m) log(n+m))</code></td><td><code>O(n+m)</code></td></tr>
+        <tr><td>Suffix tree</td><td><code>O(n+m)</code></td><td><code>O(n+m)</code></td></tr>
+      </table>
+      <h3 style="margin-top:.4em">Related problems</h3>
+      <div class="card blue" style="margin-bottom:.2em">
+        <h3>Longest common subsequence (LCS)</h3>
+        <p>Characters need not be contiguous. <code>O(nm)</code> DP. Used by <code>diff</code> tools.</p>
+      </div>
+      <div class="card purple">
+        <h3>Shortest common superstring</h3>
+        <p>NP-hard in general. Greedy approximation used in genome assembly.</p>
+      </div>
+      <p style="margin-top:.4em; color:var(--muted); font-size:.48em">Longest common substring is a building block for diff tools, plagiarism detection, and DNA sequence comparison.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 17 — Application: Text Editors & Search
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">17</span>
+    <h2>Application &mdash; Text Editors &amp; Search</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Find &amp; replace</h3>
+      <p>Every text editor uses string matching. The choice of algorithm depends on the use case:</p>
+      <ul>
+        <li><span class="a">Short patterns, interactive:</span> naive or simplified Boyer-Moore</li>
+        <li><span class="g">Long patterns, large files:</span> full Boyer-Moore &mdash; sub-linear scanning</li>
+        <li><span class="p">Regex search:</span> Thompson NFA or lazy DFA (Vim, VS Code, ripgrep)</li>
+      </ul>
+      <h3 style="margin-top:.3em">Full-text search engines</h3>
+      <p>Elasticsearch, Lucene, and Typesense build <strong>inverted indexes</strong> mapping terms to document IDs. At query time, they intersect posting lists &mdash; multi-pattern matching at scale.</p>
+    </div>
+    <div>
+      <h3>grep and ripgrep</h3>
+      <table>
+        <tr><th>Tool</th><th>Algorithm</th><th>Key feature</th></tr>
+        <tr><td><code>grep -F</code></td><td>Aho-Corasick</td><td>Multi-pattern literal</td></tr>
+        <tr><td><code>grep -E</code></td><td>DFA regex</td><td>POSIX extended regex</td></tr>
+        <tr><td>GNU <code>grep</code></td><td>Boyer-Moore + regex</td><td>Literal prefix optimisation</td></tr>
+        <tr><td><code>ripgrep</code></td><td>Aho-Corasick + lazy DFA</td><td>Parallel, .gitignore-aware</td></tr>
+      </table>
+      <p style="margin-top:.5em; color:var(--muted); font-size:.48em">ripgrep demonstrates modern string matching: literal optimisations (Aho-Corasick for multiple literals, memchr for single bytes) layered with regex when needed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 18 — Application: DNA Sequencing
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">18</span>
+    <h2>Application &mdash; DNA Sequencing</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>The alignment problem</h3>
+      <p>DNA sequencing produces millions of short reads (50-300 bp). Each must be aligned to a reference genome (3 billion bp for humans). Speed is critical.</p>
+      <h3 style="margin-top:.3em">BWT-based aligners</h3>
+      <p>Modern aligners (BWA, Bowtie2) use the <span class="a">Burrows-Wheeler Transform</span> and <span class="g">FM-index</span> &mdash; compressed representations of suffix arrays supporting <code>O(m)</code> exact matching with minimal memory.</p>
+      <h3 style="margin-top:.3em">Approximate alignment</h3>
+      <ul>
+        <li><span class="a">Seed-and-extend:</span> find exact short matches, extend with edit-distance DP</li>
+        <li><span class="g">Smith-Waterman:</span> local alignment with affine gap penalties</li>
+        <li><span class="p">BLAST:</span> heuristic seed-based search with statistical scoring</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Scale</h3>
+      <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td>Human genome</td><td>~3.2 billion base pairs</td></tr>
+        <tr><td>Typical sequencing run</td><td>100M &ndash; 1B reads</td></tr>
+        <tr><td>Alignment speed (BWA-MEM2)</td><td>~60M reads/hour</td></tr>
+      </table>
+      <h3 style="margin-top:.4em">Key data structures</h3>
+      <div class="card amber" style="margin-bottom:.2em">
+        <h3>FM-index</h3>
+        <p>Compressed suffix array with BWT. Supports exact pattern matching in <code>O(m)</code> time with ~1.5 bytes/character memory.</p>
+      </div>
+      <div class="card green">
+        <h3>Wavelet tree</h3>
+        <p>Enables rank and select queries on the BWT in <code>O(log |&Sigma;|)</code> time. Core building block of modern compressed indexes.</p>
+      </div>
+      <p style="margin-top:.4em; color:var(--muted); font-size:.48em">Without BWT/FM-index, whole-genome sequencing would be computationally infeasible.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 19 — Application: Plagiarism Detection
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">19</span>
+    <h2>Application &mdash; Plagiarism Detection</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Document fingerprinting</h3>
+      <p>Break documents into overlapping k-grams (k consecutive characters or words), hash each, and compare fingerprint sets between documents.</p>
+      <h3 style="margin-top:.3em">Winnowing algorithm</h3>
+      <p>Select a subset of k-gram hashes using a sliding window minimum. Guarantees:</p>
+      <ul>
+        <li>Any match of length &ge; <code>t</code> is detected</li>
+        <li>Fingerprint density is bounded &mdash; not every hash is stored</li>
+      </ul>
+      <h3 style="margin-top:.3em">MOSS</h3>
+      <p>Stanford's plagiarism detector for code. Uses winnowing with language-aware tokenisation (ignoring variable names, whitespace, comments).</p>
+    </div>
+    <div>
+      <h3>Similarity metrics</h3>
+      <table>
+        <tr><th>Metric</th><th>Formula</th></tr>
+        <tr><td><span class="a">Jaccard</span></td><td><code>|A &cap; B| / |A &cup; B|</code></td></tr>
+        <tr><td><span class="g">Containment</span></td><td><code>|A &cap; B| / |A|</code></td></tr>
+        <tr><td><span class="p">Cosine</span></td><td><code>A &middot; B / (|A| &middot; |B|)</code> on TF-IDF</td></tr>
+      </table>
+      <h3 style="margin-top:.4em">Pipeline</h3>
+      <div style="display:flex; flex-direction:column; gap:.15em; margin-top:.2em">
+        <div class="ss-row"><span class="ss-node active">1</span><span class="ss-arrow">&rarr;</span><span class="ss-label">Tokenise and normalise</span></div>
+        <div class="ss-row"><span class="ss-node active">2</span><span class="ss-arrow">&rarr;</span><span class="ss-label">Generate k-gram hashes (Rabin-Karp)</span></div>
+        <div class="ss-row"><span class="ss-node active">3</span><span class="ss-arrow">&rarr;</span><span class="ss-label">Select fingerprints (winnowing)</span></div>
+        <div class="ss-row"><span class="ss-node active">4</span><span class="ss-arrow">&rarr;</span><span class="ss-label">Compare fingerprint sets</span></div>
+      </div>
+      <p style="margin-top:.4em; color:var(--muted); font-size:.48em">Rabin-Karp's rolling hash is the engine behind most modern plagiarism detection systems.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 20 — Complexity Comparison & Summary
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">20</span>
+    <h2>Complexity Comparison &amp; Summary</h2>
+  </div>
+  <table style="font-size:.45em; margin-bottom:.3em">
+    <tr><th>Algorithm</th><th>Preprocess</th><th>Matching</th><th>Space</th><th>Best for</th></tr>
+    <tr><td><span class="a">Naive</span></td><td><code>O(0)</code></td><td><code>O(nm)</code></td><td><code>O(1)</code></td><td>Short patterns, one-off search</td></tr>
+    <tr><td><span class="a">KMP</span></td><td><code>O(m)</code></td><td><code>O(n)</code></td><td><code>O(m)</code></td><td>Streaming, worst-case guarantee</td></tr>
+    <tr><td><span class="a">Rabin-Karp</span></td><td><code>O(m)</code></td><td><code>O(n)</code> avg</td><td><code>O(1)</code></td><td>Multi-pattern, fingerprinting</td></tr>
+    <tr><td><span class="a">Boyer-Moore</span></td><td><code>O(m+|&Sigma;|)</code></td><td><code>O(n/m)</code> avg</td><td><code>O(m+|&Sigma;|)</code></td><td>Long patterns, large alphabets</td></tr>
+    <tr><td><span class="a">Z-Algorithm</span></td><td><code>O(m)</code></td><td><code>O(n)</code></td><td><code>O(n+m)</code></td><td>Simple implementation</td></tr>
+    <tr><td><span class="a">Aho-Corasick</span></td><td><code>O(&Sigma;m)</code></td><td><code>O(n+z)</code></td><td><code>O(&Sigma;m)</code></td><td>Many patterns simultaneously</td></tr>
+    <tr><td><span class="a">Suffix Array</span></td><td><code>O(n)</code></td><td><code>O(m log n)</code></td><td><code>O(n)</code></td><td>Many queries on same text</td></tr>
+    <tr><td><span class="a">Suffix Tree</span></td><td><code>O(n)</code></td><td><code>O(m)</code></td><td><code>O(n)</code></td><td>Rich substring queries</td></tr>
+  </table>
+  <h3>Key takeaways</h3>
+  <div class="cols cols-2" style="margin-top:.15em">
+    <div>
+      <ul>
+        <li>No single algorithm wins everywhere &mdash; choice depends on alphabet size, pattern length, number of patterns, and whether text is static or streaming</li>
+        <li>KMP and Z-algorithm give <code>O(n + m)</code> worst-case guarantees for single-pattern matching</li>
+        <li>Boyer-Moore is fastest in practice for single long patterns on natural text</li>
+        <li>Aho-Corasick is the standard for multi-pattern matching</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li>Suffix arrays and trees trade preprocessing for fast repeated queries</li>
+        <li>Approximate matching is fundamentally <code>O(nm)</code> but accelerated with bit-parallelism and filtering</li>
+        <li>Real systems combine algorithms &mdash; ripgrep uses Aho-Corasick, memchr, and lazy DFA depending on the query</li>
+      </ul>
+      <h3 style="margin-top:.3em">Recommended reading</h3>
+      <p><span class="a">CLRS</span> (string matching chapters) &middot; <span class="g">Gusfield</span> (strings, trees, sequences) &middot; <span class="p">Sedgewick &amp; Wayne</span> (practical implementations) &middot; <span class="b">cp-algorithms.com</span></p>
+    </div>
+  </div>
+</section>
+
+</div><!-- .slides -->
+</div><!-- .reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  controls: true,
+  progress: true,
+  center: false,
+  width: 1100,
+  height: 900,
+  margin: 0.01,
+  plugins: [RevealHighlight],
+  highlight: { theme: 'monokai' }
+});
+</script>
+<script>
+(function(){
+  var h = Reveal.getConfig().height || 900;
+  var m = Reveal.getConfig().margin || 0.02;
+  var maxH = Math.floor(h * (1 - 2 * m)) + 'px';
+  function fixSlides(){
+    document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){
+      s.style.display = 'block';
+      s.style.maxHeight = maxH;
+    });
+  }
+  Reveal.on('ready', fixSlides);
+  Reveal.on('slidechanged', fixSlides);
+})();
+</script>
+</body>
+</html>
