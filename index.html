@@ -6,7 +6,7 @@
   <title>String Matching Algorithms</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/white.min.css">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,17 +14,17 @@
 
   <style>
   :root {
-    --amber:  #f5a623;
-    --green:  #4ecb8d;
-    --purple: #a78bfa;
-    --blue:   #60a5fa;
-    --red:    #f87171;
-    --bg:     #0a0a0f;
-    --bg2:    #10101a;
-    --bg3:    #181824;
-    --border: #2a2a3a;
-    --text:   #e8e8f0;
-    --muted:  #8888a8;
+    --amber:  #bf7d10;
+    --green:  #1c815a;
+    --purple: #6435bc;
+    --blue:   #2b3dc5;
+    --red:    #db3a30;
+    --bg:     #fafaf8;
+    --bg2:    #f1f1ee;
+    --bg3:    #eaeae6;
+    --border: #d1d1cb;
+    --text:   #161616;
+    --muted:  #6a6a63;
   }
 
   .reveal-viewport { background: var(--bg); }
@@ -40,7 +40,7 @@
   .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
   .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
                  border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
-  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #242422; }
 
   /* ── slide chrome ── */
   .slide-hdr {
@@ -75,16 +75,16 @@
   .card.blue  { border-left: 3px solid var(--blue); }
   .card.red   { border-left: 3px solid var(--red); }
   .card h3 { font-size: .64em; margin: 0 0 .12em; }
-  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card p  { font-size: .52em; margin: 0; color: #3d3d39; }
   .card ul { margin: 0; padding-left: 1em; }
-  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
+  .card li { font-size: .52em; color: #3d3d39; margin-bottom: .02em; }
 
   /* ── table ── */
   .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
   .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
                      padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
-  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
-  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #2d2d2b; }
+  .reveal table tr:nth-child(even) td { background: #f3f3f1; }
 
   /* ── accent spans ── */
   .a  { color: var(--amber); font-weight: 600; }
@@ -127,8 +127,8 @@
     padding: .2em .55em; border-radius: 5px; font-size: .9em;
     background: var(--bg3); border: 1px solid var(--border); color: var(--text);
   }
-  .ss-node.active { background: #1a2a1a; border-color: var(--green); color: var(--green); }
-  .ss-node.done   { background: #1a1a2a; border-color: var(--purple); color: var(--purple); }
+  .ss-node.active { background: #d3e1d5; border-color: var(--green); color: var(--green); }
+  .ss-node.done   { background: #e6e6e2; border-color: var(--purple); color: var(--purple); }
   .ss-arrow { color: var(--amber); }
   .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
 
@@ -136,6 +136,7 @@
   .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
 .reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
 </style>
+<style>.reveal .slide-number{background-color:transparent}</style>
 </head>
 <body>
 <div class="reveal">
@@ -144,7 +145,7 @@
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 01 — Title
 ══════════════════════════════════════════════════════════════════ -->
-<section class="title-slide" data-background-color="#0a0a0f">
+<section class="title-slide" data-background-color="#fafaf8">
   <div style="font-family:'JetBrains Mono',monospace; font-size:.5em; color:var(--muted); margin-bottom:.4em; letter-spacing:.1em;">COMPUTER SCIENCE FUNDAMENTALS SERIES</div>
   <h1>String Matching<br>Algorithms</h1>
   <div class="subtitle">
@@ -160,7 +161,7 @@
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 02 — The String Matching Problem
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">02</span>
     <h2>The String Matching Problem</h2>
@@ -194,7 +195,7 @@
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 03 — Naive String Matching
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">03</span>
     <h2>Naive String Matching</h2>
@@ -241,7 +242,7 @@
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 04 — KMP: Intuition & Failure Function
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">04</span>
     <h2>KMP &mdash; Intuition &amp; Failure Function</h2>
@@ -277,7 +278,7 @@ Index:   0 1 2 3 4 5
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 05 — KMP: Algorithm Walkthrough
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">05</span>
     <h2>KMP &mdash; Algorithm Walkthrough</h2>
@@ -323,7 +324,7 @@ i=4: matched ABABA, mismatch P[5]='C' vs T[5]='B'
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 06 — Rabin-Karp: Rolling Hash
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">06</span>
     <h2>Rabin-Karp &mdash; Rolling Hash</h2>
@@ -365,7 +366,7 @@ q = large prime</code></pre>
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 07 — Rabin-Karp: Spurious Hits & Multi-Pattern
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">07</span>
     <h2>Rabin-Karp &mdash; Spurious Hits &amp; Multi-Pattern</h2>
@@ -404,7 +405,7 @@ q = large prime</code></pre>
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 08 — Boyer-Moore: Bad Character Rule
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">08</span>
     <h2>Boyer-Moore &mdash; Bad Character Rule</h2>
@@ -442,7 +443,7 @@ Mismatch: T[3]='R' vs P[3]='M'
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 09 — Boyer-Moore: Good Suffix Rule
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">09</span>
     <h2>Boyer-Moore &mdash; Good Suffix Rule</h2>
@@ -484,7 +485,7 @@ Mismatch: T[3]='R' vs P[3]='M'
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 10 — Z-Algorithm
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">10</span>
     <h2>Z-Algorithm</h2>
@@ -524,7 +525,7 @@ Z = [- 1 0 0 3 1 0 0 3 1 0]
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 11 — Aho-Corasick
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">11</span>
     <h2>Aho-Corasick &mdash; Multi-Pattern Matching</h2>
@@ -571,7 +572,7 @@ Matches: she (at 1), he (at 2),
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 12 — Suffix Arrays
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">12</span>
     <h2>Suffix Arrays</h2>
@@ -615,7 +616,7 @@ nana$                2</code></pre>
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 13 — Suffix Trees
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">13</span>
     <h2>Suffix Trees</h2>
@@ -658,7 +659,7 @@ nana$                2</code></pre>
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 14 — Regular Expression Matching
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">14</span>
     <h2>Regular Expression Matching</h2>
@@ -702,7 +703,7 @@ nana$                2</code></pre>
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 15 — Approximate String Matching
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">15</span>
     <h2>Approximate String Matching &mdash; Edit Distance</h2>
@@ -747,7 +748,7 @@ nana$                2</code></pre>
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 16 — Longest Common Substring
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">16</span>
     <h2>Longest Common Substring</h2>
@@ -793,7 +794,7 @@ Answer = max(DP[i][j]) for all i, j</code></pre>
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 17 — Application: Text Editors & Search
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">17</span>
     <h2>Application &mdash; Text Editors &amp; Search</h2>
@@ -827,7 +828,7 @@ Answer = max(DP[i][j]) for all i, j</code></pre>
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 18 — Application: DNA Sequencing
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">18</span>
     <h2>Application &mdash; DNA Sequencing</h2>
@@ -870,7 +871,7 @@ Answer = max(DP[i][j]) for all i, j</code></pre>
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 19 — Application: Plagiarism Detection
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">19</span>
     <h2>Application &mdash; Plagiarism Detection</h2>
@@ -911,7 +912,7 @@ Answer = max(DP[i][j]) for all i, j</code></pre>
 <!-- ═══════════════════════════════════════════════════════════════
   SLIDE 20 — Complexity Comparison & Summary
 ══════════════════════════════════════════════════════════════════ -->
-<section data-background-color="#0a0a0f">
+<section data-background-color="#fafaf8">
   <div class="slide-hdr">
     <span class="tag">20</span>
     <h2>Complexity Comparison &amp; Summary</h2>
